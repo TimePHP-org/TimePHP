@@ -1,0 +1,14 @@
+{
+    "name": "timephp/timephp",
+    "description": "foundation to create a lightweight n-tier architecture",
+    "require": {
+        "twig/twig": "^3.0",
+        "altorouter/altorouter": "^2.0",
+        "filp/whoops": "^2.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "TimePHP\\": "src/"
+        }
+    }
+}
