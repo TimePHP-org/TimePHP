@@ -1,5 +1,5 @@
 {
-    "name": "timephp/timephp",
+    "name": "mranyx/timephp",
     "description": "foundation to create a lightweight n-tier architecture",
     "require": {
         "twig/twig": "^3.0",
