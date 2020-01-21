@@ -95,7 +95,7 @@ class Router
         // si on renseigne un controller (HomeController#function 
         } else if(is_string($lst_match["target"])) {
             list($controller, $action) = explode('#', $lst_match['target']);
-            $ctrl = "TimePHP\\Bundle\\Controllers\\".$controller;
+            $ctrl = "App\\Bundle\\Controllers\\".$controller;
             if (is_callable(array(new $ctrl, $action))) {
                 call_user_func_array(array(new $ctrl,$action), $lst_match['params']);
             } else {
