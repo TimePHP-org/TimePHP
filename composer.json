@@ -1,6 +1,6 @@
 {
-    "name": "mranyx/timephp",
-    "description": "foundation to create a lightweight n-tier architecture",
+    "name": "timephp/timephp",
+    "description": "Foundation to create a lightweight MVC architecture",
     "require": {
         "twig/twig": "^3.0",
         "altorouter/altorouter": "^2.0",
