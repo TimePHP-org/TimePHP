@@ -18,7 +18,6 @@ use Illuminate\Events\Dispatcher;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 
-
 /**
  * @category Controller
  * @package TimePHP
@@ -36,9 +35,9 @@ abstract class Controller
     {
         //chargement du fichier app.ini à la racine du projet
         $dotenv = new Dotenv();
-        $dotenv->load(__DIR__ . '/../../config/.env');
+        $dotenv->load(__DIR__ . '/../../../../../config/.env');
 
-        $this->twig = new Environment(new FilesystemLoader(__DIR__ . "/../../". $_ENV['VIEW_PATH']));
+        $this->twig = new Environment(new FilesystemLoader(__DIR__ . "/../../../../../". $_ENV['VIEW_PATH']));
 
         // ajout de la fonction asset pour twig afin de récuperer l'url du dossier asset dans le repertoire public
         $this->twig->addFunction(new TwigFunction('asset', function ($asset): string
