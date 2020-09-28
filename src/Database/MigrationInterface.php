@@ -1,6 +1,6 @@
 <?php
 
-namespace TimePHP\Database\Migration;
+namespace TimePHP\Database;
 
 interface MigrationInterface {
    public function up();
