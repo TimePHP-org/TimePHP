@@ -12,10 +12,7 @@ use Twig\Environment;
 use Twig\TwigFunction;
 use TimePHP\Foundation\Router;
 use Twig\Loader\FilesystemLoader;
-use Illuminate\Container\Container;
 use Symfony\Component\Dotenv\Dotenv;
-use Illuminate\Events\Dispatcher;
-use Illuminate\Database\Capsule\Manager as Capsule;
 
 
 /**
@@ -60,7 +57,8 @@ abstract class Controller
             return ob_get_clean();
         }));
 
-        $capsule = new Capsule;
+        
+        $capsule = new Illuminate\Database\Capsule\Manager;
         $capsule->addConnection([
             'driver'    => 'mysql',
             'host'      => $_ENV['DB_HOST'],
@@ -72,7 +70,7 @@ abstract class Controller
             'collation' => 'utf8_unicode_ci',
             'prefix'    => '',
         ]);
-        $capsule->setEventDispatcher(new Dispatcher(new Container));
+        $capsule->setEventDispatcher(new Illuminate\Events\Dispatcher(new Illuminate\Container\Container));
         $capsule->setAsGlobal();
         $capsule->bootEloquent();
 
