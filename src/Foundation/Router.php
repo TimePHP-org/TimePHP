@@ -33,7 +33,6 @@ class Router
     public function __construct()
     {
         self::$router = new AltoRouter();
-        self::$router->addMatchTypes(array('s' => '[a-z0-9]+(?:-[a-z0-9]+)*')); // slug
         $this->_whoops = new Run;
         $this->_whoops->pushHandler(new PrettyPageHandler);
         $this->_whoops->register();
