@@ -10,6 +10,8 @@ namespace TimePHP\Foundation;
 
 use AltoRouter;
 use Whoops\Run;
+use DI\Container;
+use Twig\Environment;
 use Whoops\Handler\PrettyPageHandler;
 
 /**
@@ -30,12 +32,36 @@ class Router
      */
     private $_whoops;
 
-    public function __construct()
-    {
+    /**
+     * Twig variable to inject into controller
+     *
+     * @var Environment
+     */
+    private $twig;
+
+    /**
+     * app container
+     *
+     * @var Container
+     */
+    private $container;
+
+
+    /**
+     * Constructor
+     *
+     * @param array $options
+     */
+    public function __construct(array $options, Environment $twig, Container $container) {
         self::$router = new AltoRouter();
+        foreach($options["types"] as $option){
+            self::$router->addMatchTypes(array($option["id"] => $option["regex"]));
+        }
         $this->_whoops = new Run;
         $this->_whoops->pushHandler(new PrettyPageHandler);
         $this->_whoops->register();
+        $this->twig = $twig;
+        $this->container = $container;
     }
 
     /**
@@ -46,8 +72,7 @@ class Router
      * @param string|null $name (optional) name of the path
      * @return self Permet de faire du fluant calling
      */
-    public function get(string $url, $object, ?string $name): self
-    {
+    public function get(string $url, $object, ?string $name): self {
         self::$router->map("GET", $url, $object, $name);
         return $this;
     }
@@ -61,8 +86,7 @@ class Router
      * @param string|null $name (optional) name of the path
      * @return self Permet de faire du fluant calling
      */
-    public function post(string $url, $object, ?string $name): self
-    {
+    public function post(string $url, $object, ?string $name): self {
         self::$router->map("POST", $url, $object, $name);
         return $this;
     }
@@ -74,8 +98,7 @@ class Router
      * @param array|null $params (optionel) correspond au parametres à donner a l'url
      * @return string
      */
-    public static function generate(string $name, array $params = [], array $flags = []): string
-    {
+    public static function generate(string $name, array $params = [], array $flags = []): string {
         $url = self::$router->generate($name, $params);
         if(count($flags) === 0){
             return $url;
@@ -91,32 +114,42 @@ class Router
     }
 
     /**
-     * Permet d'associer le bon controller / fonction avec l'url saisi
+     * Appelle la bonne fonction en fonction des routes
+     *
+     * @return void
      */
-    public function run()
-    {
+    public function run() {
         $match = self::$router->match();
 
-        // si l'url ne correspond à aucune des routes
         if ($match === false) {
-            header("Location: ".self::$router->generate("home")); //redirection vers la page d'accueil
-
-        // si on renseigne un controller (BlogController#function) 
+            header('HTTP/1.0 404 Not Found');
         } else if(is_string($match["target"])) {
             list($controller, $function) = explode('#', $match['target']);
-            $ctrl = "App\\Bundle\\Controllers\\".$controller;
-            if (is_callable(array(new $ctrl, $function))) {
-                call_user_func_array(array(new $ctrl,$function), $match['params']);
+            if (is_callable(array(new $controller($this->twig, $this->container), $function))) {
+                call_user_func_array(array(new $controller($this->twig, $this->container),$function), $match['params']);
             } else {
                 header('HTTP/1.1 500 Internal Server Error');
             }
-        
-        // si on renseigne une fonction au lieu d'un controller
         } else if(is_object($match["target"]) && is_callable($match["target"])) {
             call_user_func_array($match["target"], $match["params"]);
         } else {
             header('HTTP/1.1 500 Internal Server Error');
         }
+    }
+
+    /**
+     * Link routes with methods
+     *
+     * @param array $routes
+     * @return self
+     */
+    public function initialize(array $routes): self{
+        foreach($routes as $route){
+            $method = $route["method"];
+            $function = (array_key_exists("controller", $route)) ? sprintf("%s#%s", $route["controller"], $route["function"]) : $route["function"];
+            $this->$method($route["url"], $function, $route["name"]);
+        }
+        return $this;
     }
 
 }
