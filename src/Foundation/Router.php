@@ -72,7 +72,7 @@ class Router
      * @param string|null $name (optional) name of the path
      * @return self Permet de faire du fluant calling
      */
-    public function get(string $url, $object, ?string $name): self {
+    private function get(string $url, $object, ?string $name): self {
         self::$router->map("GET", $url, $object, $name);
         return $this;
     }
@@ -86,7 +86,7 @@ class Router
      * @param string|null $name (optional) name of the path
      * @return self Permet de faire du fluant calling
      */
-    public function post(string $url, $object, ?string $name): self {
+    private function post(string $url, $object, ?string $name): self {
         self::$router->map("POST", $url, $object, $name);
         return $this;
     }
