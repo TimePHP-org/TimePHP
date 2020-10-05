@@ -8,7 +8,6 @@ use Twig\Loader\FilesystemLoader;
 
 class Twig {
 
-
    /**
     * Twig variable
     *
@@ -23,7 +22,7 @@ class Twig {
     */
    public function __construct(array $functions){
             
-      $this->twig = new Environment(new FilesystemLoader(__DIR__ . "/../../../../../". $_ENV['VIEW_PATH']));
+      $this->twig = new Environment(new FilesystemLoader(__DIR__ . "/../../../../../App/Bundle/Views"));
 
       $this->twig->addFunction(new TwigFunction('asset', function ($asset): string{
          return sprintf('/assets/%s', ltrim($asset, '/'));
