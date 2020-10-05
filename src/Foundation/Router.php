@@ -9,10 +9,8 @@
 namespace TimePHP\Foundation;
 
 use AltoRouter;
-use Whoops\Run;
 use DI\Container;
 use Twig\Environment;
-use Whoops\Handler\PrettyPageHandler;
 
 /**
  * @category Router
@@ -26,11 +24,6 @@ class Router
      * @var AltoRouter Variable principale du router
      */
     public static $router;
-
-    /**
-     * @var Whoops Générateur de belles pages d'erreurs
-     */
-    private $_whoops;
 
     /**
      * Twig variable to inject into controller
@@ -57,9 +50,6 @@ class Router
         foreach($options["types"] as $option){
             self::$router->addMatchTypes(array($option["id"] => $option["regex"]));
         }
-        $this->_whoops = new Run;
-        $this->_whoops->pushHandler(new PrettyPageHandler);
-        $this->_whoops->register();
         $this->twig = $twig;
         $this->container = $container;
     }

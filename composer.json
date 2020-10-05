@@ -1,6 +1,26 @@
 {
     "name": "timephp/timephp",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
     "description": "Foundation to create a lightweight MVC architecture",
+    "homepage": "https://github.com/TimePHP-org/TimePHP",
+    "keywords": ["TimePHP", "Framework", "PHP", "MVC"],
+    "minimum-stability": "dev",
+    "readme": "https://github.com/TimePHP-org/TimePHP/blob/master/README.md",
+    "version": "0.0.4",
+    "support": {
+        "email": "timephp.org@gmail.com",
+        "docs": "https://timephp-org.github.io/TimePHP-Docs/#/",
+        "issues": "https://github.com/TimePHP-org/TimePHP/issues",
+        "source": "https://github.com/TimePHP-org/TimePHP/releases"
+    },
+    "authors": [
+        {
+            "name": "Robin B",
+            "email": "timephp.org@gmail.com",
+            "role": "developer"
+        }
+    ],
     "require": {
         "twig/twig": "^3.0",
         "altorouter/altorouter": "^2.0",
