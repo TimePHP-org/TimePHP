@@ -8,7 +8,6 @@
 
 namespace TimePHP\Foundation;
 
-use DI\Container;
 use Twig\Environment;
 use TimePHP\Foundation\Router;
 
@@ -25,18 +24,8 @@ abstract class Controller
      */
     protected $twig;
 
-    /**
-     * App container
-     *
-     * @var Container
-     */
-    protected $container;
-
-    public function __construct(Environment $twig, Container $container){
-
+    public function __construct(Environment $twig){
         $this->twig = $twig;
-        $this->container = $container;
-
     }
 
     /**

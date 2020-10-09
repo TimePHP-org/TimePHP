@@ -9,7 +9,6 @@
 namespace TimePHP\Foundation;
 
 use AltoRouter;
-use DI\Container;
 use Twig\Environment;
 
 /**
@@ -33,25 +32,16 @@ class Router
     private $twig;
 
     /**
-     * app container
-     *
-     * @var Container
-     */
-    private $container;
-
-
-    /**
      * Constructor
      *
      * @param array $options
      */
-    public function __construct(array $options, Environment $twig, Container $container) {
+    public function __construct(array $options, Environment $twig) {
         self::$router = new AltoRouter();
         foreach($options["types"] as $option){
             self::$router->addMatchTypes(array($option["id"] => $option["regex"]));
         }
         $this->twig = $twig;
-        $this->container = $container;
     }
 
     /**
@@ -115,8 +105,8 @@ class Router
             header('HTTP/1.0 404 Not Found');
         } else if(is_string($match["target"])) {
             list($controller, $function) = explode('#', $match['target']);
-            if (is_callable(array(new $controller($this->twig, $this->container), $function))) {
-                call_user_func_array(array(new $controller($this->twig, $this->container),$function), $match['params']);
+            if (is_callable(array(new $controller($this->twig), $function))) {
+                call_user_func_array(array(new $controller($this->twig),$function), $match['params']);
             } else {
                 header('HTTP/1.1 500 Internal Server Error');
             }
