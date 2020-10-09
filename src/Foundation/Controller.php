@@ -16,7 +16,7 @@ use TimePHP\Foundation\Router;
  * @package TimePHP
  * @subpackage Foundation
  */
-abstract class Controller
+abstract class AbstractController
 {
 
     /**
