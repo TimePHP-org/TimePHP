@@ -46,5 +46,15 @@ class Twig {
       }
 
    }
+
+   /**
+    * Return Twig variable
+    *
+    * @return Environment
+    */
+   public function getRenderer(): Environment {
+      return $this->twig;
+   }
    
+
 }
