@@ -7,7 +7,6 @@
     "keywords": ["TimePHP", "Framework", "PHP", "MVC"],
     "minimum-stability": "dev",
     "readme": "https://github.com/TimePHP-org/TimePHP/blob/master/README.md",
-    "version": "0.0.7",
     "support": {
         "email": "timephp.org@gmail.com",
         "docs": "https://timephp-org.github.io/TimePHP-Docs/#/",
