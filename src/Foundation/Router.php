@@ -44,6 +44,30 @@ class Router
         $this->twig = $twig;
     }
 
+    
+    /**
+     * Permet de generer une url via le nom de la route
+     * 
+     * @param string $name Correspond au nom de la route que l'on souhaite
+     * @param array|null $params (optionel) correspond au parametres à donner a l'url
+     * @param array|null $flags (optionel) correspond au parametres à donner a l'url
+     * @return string
+     */
+    public static function generate(string $name, array $params = [], array $flags = []): string {
+        $url = self::$router->generate($name, $params);
+        if(count($flags) === 0){
+            return $url;
+        } else {
+            $index = 0;
+            foreach($flags as $key => $value){
+                $index === 0 ? $url.="?" : $url.="&";
+                $url.=$key."=".$value;
+                $index++;
+            }
+            return $url;
+        }
+    }
+
     /**
      * Permet d'ajouter une nouvelle route
      * 

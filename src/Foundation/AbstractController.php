@@ -48,18 +48,7 @@ abstract class AbstractController
      * @return string
      */
     public function generate(string $name, array $params = [], array $flags = []): string {
-        $url = Router::$router->generate($name, $params);
-        if(count($flags) === 0){
-            return $url;
-        } else {
-            $index = 0;
-            foreach($flags as $key => $value){
-                $index === 0 ? $url.="?" : $url.="&";
-                $url.=$key."=".$value;
-                $index++;
-            }
-            return $url;
-        }
+        return Router::generate($name, $params, $flags);
     }
 
 }
