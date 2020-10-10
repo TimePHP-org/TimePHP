@@ -2,9 +2,9 @@
 
 namespace TimePHP\Exception;
 
-class SessionException extends \Exception {
-
-   public function __construct($message = null, $code = 1000) {
+class RedirectionException extends \Exception {
+   
+   public function __construct($message = null, $code = 2000) {
       if (!$message) {
          throw new $this('Unknown ' . get_class($this));
       }

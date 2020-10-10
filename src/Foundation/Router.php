@@ -58,12 +58,7 @@ class Router
         if(count($flags) === 0){
             return $url;
         } else {
-            $index = 0;
-            foreach($flags as $key => $value){
-                $index === 0 ? $url.="?" : $url.="&";
-                $url.=$key."=".$value;
-                $index++;
-            }
+            $url .= "?".http_build_query($flags);
             return $url;
         }
     }
