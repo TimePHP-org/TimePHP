@@ -10,6 +10,7 @@ namespace TimePHP\Foundation;
 
 use AltoRouter;
 use Twig\Environment;
+use TimePHP\Exception\RouterException;
 
 /**
  * @category Router
@@ -99,18 +100,30 @@ class Router
         $match = self::$router->match();
 
         if ($match === false) {
-            header('HTTP/1.0 404 Not Found');
+            if($_ENV["APP_ENV"] == 0){    
+                header('HTTP/1.0 404 Not Found');
+            } else {
+                throw new RouterException("Undefined route : {$_SERVER['REQUEST_URI']}", 3001);
+            }
         } else if(is_string($match["target"])) {
             list($controller, $function) = explode('#', $match['target']);
             if (is_callable(array(new $controller($this->twig), $function))) {
                 call_user_func_array(array(new $controller($this->twig),$function), $match['params']);
             } else {
-                header('HTTP/1.1 500 Internal Server Error');
+                if($_ENV["APP_ENV"] == 0){    
+                    header('HTTP/1.1 500 Internal Server Error');
+                } else {
+                    throw new RouterException("Cannot call the function $function on $controller", 3002);
+                }
             }
         } else if(is_object($match["target"]) && is_callable($match["target"])) {
             call_user_func_array($match["target"], $match["params"]);
         } else {
-            header('HTTP/1.1 500 Internal Server Error');
+            if($_ENV["APP_ENV"] == 0){    
+                header('HTTP/1.1 500 Internal Server Error');
+            } else {
+                throw new RouterException("Somethiong went wrong", 3003);
+            }       
         }
     }
 
@@ -123,7 +136,7 @@ class Router
     public function initialize(array $routes): self{
         foreach($routes as $route){
             $method = $route["method"];
-            $function = (array_key_exists("controller", $route)) ? sprintf("%s#%s", $route["controller"], $route["function"]) : $route["function"];
+            $function = (array_key_exists("controller", $route) && array_key_exists("function", $route)) ? sprintf("%s#%s", $route["controller"], $route["function"]) : $route["function"];
             $this->$method($route["url"], $function, $route["name"]);
         }
         return $this;
