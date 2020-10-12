@@ -136,14 +136,18 @@ class Router
     public function initialize(array $routes): self{
         foreach($routes as $route){
             $type = $route["type"] ?? "web";
-            $tmpPrefix = $route["prefix"] ?? "";
-            if(!preg_match("/^\/[a-zA-Z0-9_-]+$/", $tmpPrefix) && $tmpPrefix !== ""){
-                throw new RouterException("$tmpPrefix isn't a valid prefix. Prefixes must be like /prefix_name_561 or /prefix-name-120", 3004);
+            if(!class_exists(\TimePHP\Rest\AbstractRestController::class)) {
+                throw new RouterException("You can not use the api type in your routes without installing the following package : timephp/rest", 3004);
+            } else {
+                $tmpPrefix = $route["prefix"] ?? "";
+                if(!preg_match("/^\/[a-zA-Z0-9_-]+$/", $tmpPrefix) && $tmpPrefix !== ""){
+                    throw new RouterException("$tmpPrefix isn't a valid prefix. Prefixes must be like /prefix_name_561 or /prefix-name-120", 3005);
+                }
+                $prefix = ($route["type"] === "api" && !array_key_exists("prefix", $route)) ? "/api" : $tmpPrefix;
+                $method = $route["method"];
+                $function = (array_key_exists("controller", $route) && array_key_exists("function", $route)) ? sprintf("%s#%s", $route["controller"], $route["function"]) : $route["function"];
+                $this->$method($prefix.$route["url"], $function, $route["name"]);
             }
-            $prefix = ($route["type"] === "api" && !array_key_exists("prefix", $route)) ? "/api" : $tmpPrefix;
-            $method = $route["method"];
-            $function = (array_key_exists("controller", $route) && array_key_exists("function", $route)) ? sprintf("%s#%s", $route["controller"], $route["function"]) : $route["function"];
-            $this->$method($prefix.$route["url"], $function, $route["name"]);
         }
         return $this;
     }
