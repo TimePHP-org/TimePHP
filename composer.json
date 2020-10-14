@@ -5,7 +5,7 @@
     "description": "Foundation to create a lightweight MVC architecture",
     "homepage": "https://github.com/TimePHP-org/TimePHP",
     "keywords": ["TimePHP", "Framework", "PHP", "MVC"],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "readme": "https://github.com/TimePHP-org/TimePHP/blob/master/README.md",
     "support": {
         "email": "timephp.org@gmail.com",
