@@ -3,13 +3,15 @@
 namespace TimePHP\Foundation;
 
 use Closure;
+use Twig\Markup;
 use Twig\TwigFilter;
 use Twig\Environment;
 use Twig\TwigFunction;
 use Twig\Loader\FilesystemLoader;
 use TimePHP\Exception\TwigException;
 
-class Twig {
+class Twig
+{
 
    /**
     * Twig variable
@@ -23,7 +25,8 @@ class Twig {
     *
     * @param array $options
     */
-   public function __construct(array $options) {
+   public function __construct(array $options)
+   {
 
       $this->twig = new Environment(new FilesystemLoader(__DIR__ . "/../../../../../App/Bundle/Views"));
 
@@ -36,7 +39,9 @@ class Twig {
       $this->twig->addFunction(new TwigFunction('generate', function (string $nameUrl, array $params = [], array $flags = []): string {
          return sprintf(Router::generate($nameUrl, $params, $flags));
       }));
-
+      $this->twig->addFunction(new TwigFunction('provideCsrf', function (string $csrfInputName = "csrf_token"): string {
+         return !empty($_SESSION) ? new Markup("<input type=\"hidden\" name=\"$csrfInputName\" value\"".$_SESSION["csrf_token"]."\"/>", "utf-8") : "";
+      }, ['is_safe' => ['html']]));
       $this->twig->addFunction(new TwigFunction('dump', function ($object): string {
          ob_start();
          dump($object);
@@ -48,31 +53,32 @@ class Twig {
          $name = $function["name"];
 
          if (array_key_exists("function", $function) && is_object($function["function"])) {
-            if($function["type"] === "function") {
+            if ($function["type"] === "function") {
                $this->twig->addFunction(new TwigFunction($name, $function["function"]));
-            } elseif($function["type"] === "filter") {
+            } elseif ($function["type"] === "filter") {
                $this->twig->addFilter(new TwigFilter($name, $function["function"]));
             }
          } else if (array_key_exists("class", $function) && array_key_exists("function", $function) && is_callable([new $function["class"], $function["function"]])) {
             $callable = Closure::fromCallable([new $function["class"], $function["function"]]);
-            if($function["type"] === "function") {
+            if ($function["type"] === "function") {
                $this->twig->addFunction(new TwigFunction($name, $callable));
-            } elseif($function["type"] === "filter") {
+            } elseif ($function["type"] === "filter") {
                $this->twig->addFilter(new TwigFilter($name, $callable));
             }
          } else {
             if ($_ENV["APP_ENV"] == 0) {
                header('HTTP/1.1 500 Internal Server Error');
             } else {
-               if ($type === "addFunction") {
+               if ($function["type"] === "function") {
                   throw new TwigException("Cannot add the custom twig function : $name", 4001);
-               } elseif ($type === "addFilter") {
-                  throw new TwigException("Cannot add the custom twig filter : $name", 4001);
+               } elseif ($function["type"] === "filter") {
+                  throw new TwigException("Cannot add the custom twig filter : $name", 4002);
+               } else {
+                  throw new TwigException("{$function["type"]} is not a valid twig option type. Must be either function or filter.", 4003);
                }
             }
          }
       }
-
    }
 
    /**
@@ -80,8 +86,8 @@ class Twig {
     *
     * @return Environment
     */
-   public function getRenderer(): Environment {
+   public function getRenderer(): Environment
+   {
       return $this->twig;
    }
-
 }

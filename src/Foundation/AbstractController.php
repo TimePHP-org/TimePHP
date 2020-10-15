@@ -61,9 +61,9 @@ abstract class AbstractController
      * @return void
      */
     public function createSession(array $params): void {
-        if($params === null || empty($params) || count($params) === 0){
+        if($params === null || empty($params) || empty($params)){
             throw new SessionException("createSession function requires an array, null given", 1001);
-        } else if(count($_SESSION) > 0) {
+        } else if(!empty($_SESSION)) {
             throw new SessionException('A session has already been started', 1002);
         } else {
             $_SESSION["csrf_token"] = CsrfToken::generate();
@@ -79,11 +79,24 @@ abstract class AbstractController
      * @return void
      */
     public function closeSession(): void {
-        if(count($_SESSION) === 0){
+        if(empty($_SESSION) === 0){
             throw new SessionException('No session was created. $_SESSION is empty', 1003);
         } else {
             session_unset();
             session_destroy();
+        }
+    }
+
+    /**
+     * Return the ucrrent session
+     *
+     * @return array|null
+     */
+    public function getSession(): ?array {
+        if(empty($_SESSION)) {
+            return null;
+        } else {
+            return $_SESSION;
         }
     }
 
@@ -110,6 +123,35 @@ abstract class AbstractController
             header("Location: {$this->generate($routeName, $params, $flags)}");
         } else {
             throw new RedirectionException("$routeName doesn't exists");
+        }
+    }
+
+
+    /**
+     * Return a value from $_POST for a specific index
+     *
+     * @param string $index
+     * @return mixed|null
+     */
+    public function post(string $index){
+        return isset($_POST[$index]) ? $_POST[$index] : null; 
+    }
+
+    /**
+     * Return a value from $_GET for a specific index
+     *
+     * @param string $index
+     * @return mixed|null
+     */
+    public function get(string $index) {
+        if(isset($_GET[$index])){
+            if(is_numeric($_GET[$index])){
+                return (int) $_GET[$index];
+            } else {
+                return $_GET[$index];
+            }
+        } else {
+            return null;
         }
     }
 
