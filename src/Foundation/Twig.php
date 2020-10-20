@@ -2,9 +2,9 @@
 
 namespace TimePHP\Foundation;
 
+use function dump;
 use Closure;
 use DateTime;
-use Illuminate\Support\Facades\Session;
 use Twig\Markup;
 use Twig\TwigFilter;
 use Twig\Environment;
@@ -13,6 +13,8 @@ use TimePHP\UrlParser\Parser;
 use Twig\Loader\FilesystemLoader;
 use TimePHP\Exception\TwigException;
 use TimePHP\Foundation\SessionHandler;
+use TimePHP\Foundation\Twig\FilterTwig;
+use TimePHP\Foundation\Twig\FunctionTwig;
 
 class Twig
 {
@@ -51,11 +53,12 @@ class Twig
       $this->session = new SessionHandler();
       $this->request = new Parser();
 
+      $filter = new FilterTwig();
+      $function = new FunctionTwig();
+
       $this->twig = new Environment(new FilesystemLoader(__DIR__ . "/../../../../../App/Bundle/Views"));
 
-      $this->twig->addFunction(new TwigFunction('asset', function ($asset): string {
-         return sprintf('/assets/%s', ltrim($asset, '/'));
-      }));
+      $this->twig->addFunction(new TwigFunction('asset', $function->asset));
       $this->twig->addFunction(new TwigFunction('component', function ($component): string {
          return sprintf('components/%s', ltrim($component, '/'));
       }));
