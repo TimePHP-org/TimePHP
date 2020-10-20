@@ -3,12 +3,16 @@
 namespace TimePHP\Foundation;
 
 use Closure;
+use DateTime;
+use Illuminate\Support\Facades\Session;
 use Twig\Markup;
 use Twig\TwigFilter;
 use Twig\Environment;
 use Twig\TwigFunction;
+use TimePHP\UrlParser\Parser;
 use Twig\Loader\FilesystemLoader;
 use TimePHP\Exception\TwigException;
+use TimePHP\Foundation\SessionHandler;
 
 class Twig
 {
@@ -20,6 +24,22 @@ class Twig
     */
    private $twig;
 
+
+   /**
+    * session handler
+    *
+    * @var SessionHandler
+    */
+   private $session;
+
+
+   /**
+    * Url parser
+    *
+    * @var Parser
+    */
+   private $request;
+
    /**
     * array of custom options
     *
@@ -27,6 +47,9 @@ class Twig
     */
    public function __construct(array $options)
    {
+
+      $this->session = new SessionHandler();
+      $this->request = new Parser();
 
       $this->twig = new Environment(new FilesystemLoader(__DIR__ . "/../../../../../App/Bundle/Views"));
 
@@ -40,13 +63,36 @@ class Twig
          return sprintf(Router::generate($nameUrl, $params, $flags));
       }));
       $this->twig->addFunction(new TwigFunction('provideCsrf', function (string $csrfInputName = "csrf_token"): string {
-         return !empty($_SESSION) ? new Markup("<input type=\"hidden\" name=\"$csrfInputName\" value\"".$_SESSION["csrf_token"]."\"/>", "utf-8") : "";
+         return !empty($_SESSION) ? new Markup("<input type=\"hidden\" name=\"$csrfInputName\" value=\"{$_SESSION["csrf_token"]}\"/>", "utf-8") : "";
       }, ['is_safe' => ['html']]));
       $this->twig->addFunction(new TwigFunction('dump', function ($object): string {
          ob_start();
          dump($object);
          return ob_get_clean();
       }));
+      $this->twig->addFunction(new TwigFunction("get", function (string $param) {
+         return $this->request->get($param) !== null ? $this->request->get($param) : null;
+      }));
+      $this->twig->addFunction(new TwigFunction("isConnected", function () {
+         return $this->session->get("csrf_token") !== null;
+      }));
+      $this->twig->addFunction(new TwigFunction("isAdmin", function () {
+         return $this->session->get("csrf_token") !== null && $this->session->get("user")->role === "admin";
+      }));
+      $this->twig->addFunction(new TwigFunction("isUser", function () {
+         return $this->session->get("csrf_token") !== null && $this->session->get("user")->role === "user";
+      }));
+
+
+
+      $this->twig->addFilter(new TwigFilter("truncate", function (string $text, int $length) {
+         return substr($text, 0, $length);
+      }));
+      $this->twig->addFilter(new TwigFilter("formatDate", function (DateTime $date, string $format) {
+         $date = new DateTime($date);
+         return $date->format($format);
+      }));
+
 
       foreach ($options["twig"] as $function) {
 

@@ -9,8 +9,11 @@
 namespace TimePHP\Foundation;
 
 use Twig\Environment;
+use TimePHP\UrlParser\Parser;
 use TimePHP\Foundation\Router;
 use TimePHP\Security\CsrfToken;
+use TimePHP\Foundation\Authorization;
+use TimePHP\Foundation\SessionHandler;
 use TimePHP\Exception\SessionException;
 use TimePHP\Exception\RedirectionException;
 
@@ -27,8 +30,18 @@ abstract class AbstractController
      */
     protected $twig;
 
-    public function __construct(Environment $twig){
+
+    /**
+     * @var Parser
+     */
+    protected $request;
+
+    public function __construct(Environment $twig)
+    {
         $this->twig = $twig;
+        $this->request = new Parser();
+        $this->session = new SessionHandler();
+        $this->authorization = new Authorization();
     }
 
     /**
@@ -38,7 +51,8 @@ abstract class AbstractController
      * @param array $parameters
      * @return void
      */
-    public function render(string $view, array $parameters = []){
+    public function render(string $view, array $parameters = [])
+    {
         echo $this->twig->render($view, $parameters);
     }
 
@@ -50,25 +64,29 @@ abstract class AbstractController
      * @param array|null $flags (optionel) correspond au parametres à donner a l'url
      * @return string
      */
-    public function generate(string $name, array $params = [], array $flags = []): string {
+    public function generate(string $name, array $params = [], array $flags = []): string
+    {
         return Router::generate($name, $params, $flags);
     }
 
     /**
      * Create a session based on parameters
      *
+     * @param object $user
      * @param array $params
      * @return void
      */
-    public function createSession(array $params): void {
-        if($params === null || empty($params) || empty($params)){
+    public function createSession( \App\Bundle\Entity\User $user, ?array $params = []): void
+    {
+        if ($user === null || empty($user)) {
             throw new SessionException("createSession function requires an array, null given", 1001);
-        } else if(!empty($_SESSION)) {
+        } else if (!empty($this->session->get())) {
             throw new SessionException('A session has already been started', 1002);
         } else {
-            $_SESSION["csrf_token"] = CsrfToken::generate();
-            foreach($params as $key => $value){
-                $_SESSION[$key] = $value;
+            $this->session->set("csrf_token", CsrfToken::generate())
+                ->set("user", $user);
+            foreach ($params as $key => $value) {
+                $this->session->set($key, $value);
             }
         }
     }
@@ -78,25 +96,13 @@ abstract class AbstractController
      *
      * @return void
      */
-    public function closeSession(): void {
-        if(empty($_SESSION) === 0){
+    public function closeSession(): void
+    {
+        if (empty($this->session->get())) {
             throw new SessionException('No session was created. $_SESSION is empty', 1003);
         } else {
             session_unset();
             session_destroy();
-        }
-    }
-
-    /**
-     * Return the ucrrent session
-     *
-     * @return array|null
-     */
-    public function getSession(): ?array {
-        if(empty($_SESSION)) {
-            return null;
-        } else {
-            return $_SESSION;
         }
     }
 
@@ -106,7 +112,8 @@ abstract class AbstractController
      * @param string $url
      * @return void
      */
-    public function redirectUrl(string $url): void {
+    public function redirectUrl(string $url): void
+    {
         header("Location: $url");
     }
 
@@ -118,40 +125,12 @@ abstract class AbstractController
      * @param array $flags
      * @return void
      */
-    public function redirectRouteName(string $routeName, array $params = [], array $flags = []): void {
-        if(is_string($routeName)) {
-            header("Location: {$this->generate($routeName, $params, $flags)}");
+    public function redirectRouteName(string $routeName, array $params = [], array $flags = []): void
+    {
+        if (is_string($routeName)) {
+            header("Location: {$this->generate($routeName,$params,$flags)}");
         } else {
             throw new RedirectionException("$routeName doesn't exists");
-        }
-    }
-
-
-    /**
-     * Return a value from $_POST for a specific index
-     *
-     * @param string $index
-     * @return mixed|null
-     */
-    public function post(string $index){
-        return isset($_POST[$index]) ? $_POST[$index] : null; 
-    }
-
-    /**
-     * Return a value from $_GET for a specific index
-     *
-     * @param string $index
-     * @return mixed|null
-     */
-    public function get(string $index) {
-        if(isset($_GET[$index])){
-            if(is_numeric($_GET[$index])){
-                return (int) $_GET[$index];
-            } else {
-                return $_GET[$index];
-            }
-        } else {
-            return null;
         }
     }
 
